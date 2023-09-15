@@ -10,7 +10,7 @@ import puppeteer from "puppeteer";
 import axios from 'axios';
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import fs from 'fs';
-    
+
 export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, companyId: number, contact: Contact, wbot: WASocket) => {
   const filaescolhida = ticket.queue?.name
   if (filaescolhida === "2ª Via de Boleto" || filaescolhida === "2 Via de Boleto") {
@@ -185,7 +185,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyPdfQr);
                         await sleep(2000)
 
-                        //GERA O PDF                                    
+                        //GERA O PDF
                         const nomePDF = `Boleto-${nome}-${dia}-${mes}-${ano}.pdf`;
                         (async () => {
                           const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
@@ -756,7 +756,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   };
                   //await sleep(2000)
                   //await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyBoleto);
-                  //LINHA DIGITAVEL                    
+                  //LINHA DIGITAVEL
                   if (impresso !== "S") {
                     //IMPRIME BOLETO PARA GERAR CODIGO BARRAS
                     var boletopdf = {
@@ -866,7 +866,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                           };
                           await sleep(2000)
                           await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                          //REALIZANDO O DESBLOQUEIO   
+                          //REALIZANDO O DESBLOQUEIO
                           var optionsdesbloqeuio = {
                             method: 'POST',
                             url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -929,7 +929,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                               }).catch(function (error) {
                                 console.error(error);
                               });
-                              //FIM DA DESCONEXÃO 
+                              //FIM DA DESCONEXÃO
                             } else {
                               var msgerrolbieracao = response.data.mensagem
                               const bodyerro = {
@@ -1029,7 +1029,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                           };
                           await sleep(2000)
                           await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                          //REALIZANDO O DESBLOQUEIO   
+                          //REALIZANDO O DESBLOQUEIO
                           var optionsdesbloqeuio = {
                             method: 'POST',
                             url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -1115,7 +1115,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                               }).catch(function (error) {
                                 console.error(error);
                               });
-                              //FIM DA DESCONEXÃO 
+                              //FIM DA DESCONEXÃO
                             } else {
                               const bodyerro = {
                                 text: formatBody(`Ops! Ocorreu um erro e nao consegui desbloquear! Digite *#* e fale com um atendente!`, contact),
@@ -1152,7 +1152,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         await sleep(2000)
                         await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyerro);
                       });
-                      ///VE SE ESTA BLOQUEADO PARA LIBERAR!                            
+                      ///VE SE ESTA BLOQUEADO PARA LIBERAR!
                     }
                   }).catch(function (error) {
                     console.error(error);
@@ -1361,7 +1361,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                     };
                     await sleep(2000)
                     await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                    //REALIZANDO O DESBLOQUEIO   
+                    //REALIZANDO O DESBLOQUEIO
                     var optionsdesbloqeuio = {
                       method: 'POST',
                       url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -1448,7 +1448,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         }).catch(function (error) {
                           console.error(error);
                         });
-                        //FIM DA DESCONEXÃO 
+                        //FIM DA DESCONEXÃO
 
                       } else {
                         const bodyerro = {
@@ -1467,7 +1467,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                                  const bodyerro = {
                   text: formatBody(`Ops! Ocorreu um erro e nao consegui desbloquear! Digite *#* e fale com um atendente!`
                                  await sleep(2000)
-                                 await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,bodyerro);  
+                                 await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,bodyerro);
                              } */
 
                     }).catch(async function (error) {
@@ -1514,6 +1514,129 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
               };
               await sleep(2000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+            });
+          } else {
+            const body = {
+              text: formatBody(`Este CPF/CNPJ não é válido!\n\nPor favor tente novamente!\nOu digite *#* para voltar ao *Menu Anterior*`, contact),
+            };
+            await sleep(2000)
+            await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+          }
+        }
+      }
+    }
+  }
+
+  if (filaescolhida === 'Consultar Mensalidades') {
+
+    let cpfcnpj
+    cpfcnpj = getBodyMessage(msg);
+    cpfcnpj = cpfcnpj.replace(/\./g, '');
+    cpfcnpj = cpfcnpj.replace('-', '')
+    cpfcnpj = cpfcnpj.replace('/', '')
+    cpfcnpj = cpfcnpj.replace(' ', '')
+    cpfcnpj = cpfcnpj.replace(',', '')
+
+    const erpCaioUrl = await Setting.findOne({
+      where: {
+        key: "erp_caio_url",
+        companyId
+      }
+    });
+
+    const erpCaioKey = await Setting.findOne({
+      where: {
+        key: "erp_caio_key",
+        companyId
+      }
+    });
+
+    let erpCaioUrlValue = '' //erpCaioUrl.value
+    if (erpCaioUrlValue.substr(-1) === '/') {
+      erpCaioUrlValue = erpCaioUrlValue.slice(0, -1);
+    }
+
+    //VARS
+    let url = `${erpCaioUrlValue}/api/`;
+    const key = erpCaioKey.value
+
+    const cnpj_cpf = getBodyMessage(msg);
+    let numberCPFCNPJ = cpfcnpj;
+
+    if (key != "") {
+      if (isNumeric(numberCPFCNPJ) === true) {
+        if (cpfcnpj.length > 2) {
+          const isCPFCNPJ = validaCpfCnpj(numberCPFCNPJ)
+          if (isCPFCNPJ) {
+            if (numberCPFCNPJ.length <= 11) {
+              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d)/, "$1.$2")
+              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d)/, "$1.$2")
+              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+            } else {
+              numberCPFCNPJ = numberCPFCNPJ.replace(/^(\d{2})(\d)/, "$1.$2")
+              numberCPFCNPJ = numberCPFCNPJ.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+              numberCPFCNPJ = numberCPFCNPJ.replace(/\.(\d{3})(\d)/, ".$1/$2")
+              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{4})(\d)/, "$1-$2")
+            }
+
+            //const token = await CheckSettingsHelper("OBTEM O TOKEN DO BANCO (dei insert na tabela settings)")
+            const body = {
+              text: formatBody(`Aguarde! Estamos consultando na base de dados!`, contact),
+            };
+
+            try {
+              await sleep(2000)
+              await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+            } catch (error) {
+              //console.log('Não consegui enviar a mensagem!')
+            }
+
+            let options = {
+              method: 'GET',
+              url: `${url}/conta_mensalidades/por_cpf/${numberCPFCNPJ}`,
+              headers: {
+                ixcsoft: 'listar',
+                Authorization: `Basic ${key}`
+              },
+              data: {
+
+              }
+            };
+
+            axios.request(options as any).then(async function (response) {
+              console.log('response.data >>>>', response.data)
+
+              // Inicializando a mensagem
+              let mensagemMensalidades = "Lista de Mensalidades:\n";
+
+              // Iterando através do array de mensalidades para montar a mensagem
+              response.data.forEach((mensalidade, index) => {
+                mensagemMensalidades += `
+                Mensalidade ${index + 1}:
+                - Valor: ${mensalidade.conta.valor}
+                - Data de Vencimento: ${mensalidade.conta.data_vencimento}
+                - Data de Pagamento: ${mensalidade.conta.data_pagamento || "Não pago"}
+                - Método de Pagamento: ${mensalidade.conta.metodo_pagamento || "N/A"}
+                - Favorecido: ${mensalidade.conta.favorecido}
+                ------------------------------
+                `;
+              });
+
+              // Enviando a mensagem formatada
+              const body = {
+                text: formatBody(mensagemMensalidades, contact),
+              };
+              await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+
+            }).catch(async function (error) {
+
+              const body = {
+                text: formatBody(`Houve um erro e não foi possível consultar as mensalidades para o CPF informado. ${error}`, contact),
+              };
+              await sleep(2000)
+              await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+              console.error('Erro ao realizar a requisição:', error);
+
             });
           } else {
             const body = {
