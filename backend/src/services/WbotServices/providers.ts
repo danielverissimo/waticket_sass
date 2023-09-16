@@ -1529,12 +1529,6 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
 
   if (filaescolhida === 'Consultar Mensalidades') {
 
-    const body = {
-      text: formatBody(`Digite o CPF para consultar as mensalidades`, contact),
-    };
-    await sleep(2000)
-    await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
-
     let cpfcnpj
     cpfcnpj = getBodyMessage(msg);
     cpfcnpj = cpfcnpj.replace(/\./g, '');
