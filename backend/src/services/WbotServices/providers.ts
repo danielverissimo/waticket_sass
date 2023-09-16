@@ -1551,7 +1551,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
       }
     });
 
-    let erpCaioUrlValue = '' //erpCaioUrl.value
+    let erpCaioUrlValue = 'https://ge-caio-martins.herokuapp.com' //erpCaioUrl.value
     if (erpCaioUrlValue.substr(-1) === '/') {
       erpCaioUrlValue = erpCaioUrlValue.slice(0, -1);
     }
@@ -1563,7 +1563,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
     const cnpj_cpf = getBodyMessage(msg);
     let numberCPFCNPJ = cpfcnpj;
 
-    if (key != "") {
+    if (true) {
       if (isNumeric(numberCPFCNPJ) === true) {
         if (cpfcnpj.length > 2) {
           const isCPFCNPJ = validaCpfCnpj(numberCPFCNPJ)
