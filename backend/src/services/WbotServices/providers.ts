@@ -1568,65 +1568,61 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
         if (cpfcnpj.length > 2) {
           const isCPFCNPJ = validaCpfCnpj(numberCPFCNPJ)
           if (isCPFCNPJ) {
-            if (numberCPFCNPJ.length <= 11) {
-              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d)/, "$1.$2")
-              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d)/, "$1.$2")
-              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-            } else {
-              numberCPFCNPJ = numberCPFCNPJ.replace(/^(\d{2})(\d)/, "$1.$2")
-              numberCPFCNPJ = numberCPFCNPJ.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-              numberCPFCNPJ = numberCPFCNPJ.replace(/\.(\d{3})(\d)/, ".$1/$2")
-              numberCPFCNPJ = numberCPFCNPJ.replace(/(\d{4})(\d)/, "$1-$2")
-            }
-
-            //const token = await CheckSettingsHelper("OBTEM O TOKEN DO BANCO (dei insert na tabela settings)")
             const body = {
-              text: formatBody(`Aguarde! Estamos consultando na base de dados!`, contact),
+              text: formatBody(`Aguarde! Estamos consultando na base de dados! ⏳`, contact),
             };
 
             try {
-              await sleep(2000)
+              await sleep(1000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
             } catch (error) {
               //console.log('Não consegui enviar a mensagem!')
             }
 
             let options = {
-              method: 'GET',
-              url: `${url}/conta_mensalidades/por_cpf/${numberCPFCNPJ}`,
-              headers: {
-                ixcsoft: 'listar',
-                Authorization: `Basic ${key}`
-              },
-              data: {
-
-              }
+                method: 'GET',
+                url: `${url}conta_mensalidades/por_cpf/${numberCPFCNPJ}`,
+                headers: {
+                    // Authorization: `Basic ${key}`
+                },
+                data: {}
             };
 
             axios.request(options as any).then(async function (response) {
-              console.log('response.data >>>>', response.data)
-
-              // Inicializando a mensagem
-              let mensagemMensalidades = "Lista de Mensalidades:\n";
-
-              // Iterando através do array de mensalidades para montar a mensagem
-              response.data.forEach((mensalidade, index) => {
-                mensagemMensalidades += `
-                Mensalidade ${index + 1}:
-                - Valor: ${mensalidade.conta.valor}
-                - Data de Vencimento: ${mensalidade.conta.data_vencimento}
-                - Data de Pagamento: ${mensalidade.conta.data_pagamento || "Não pago"}
-                - Método de Pagamento: ${mensalidade.conta.metodo_pagamento || "N/A"}
-                - Favorecido: ${mensalidade.conta.favorecido}
-                ------------------------------
-                `;
+              console.log('response.data >>>>', response.data);
+              // Filtrando as mensalidades
+              let mensalidades = response.data.filter(mensalidade => {
+                if (mensalidade.conta && mensalidade.conta.data_vencimento) {
+                  let partes = mensalidade.conta.data_vencimento.split('/');
+                  let dataVencimento = new Date(partes[2], partes[1] - 1, partes[0]);
+                  let dataAtual = new Date();
+                  dataAtual.setHours(0, 0, 0, 0);
+                  return dataVencimento < dataAtual;
+                }
+                return false;
               });
 
-              // Enviando a mensagem formatada
-              const body = {
-                text: formatBody(mensagemMensalidades, contact),
-              };
-              await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+              // Verificando se há mensalidades vencidas
+              if (mensalidades.length === 0) {
+                await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { text: "Não há nenhuma mensalidade em aberto. 👌\n" });
+              } else {
+                let mensagemMensalidades = "Lista de Mensalidades:\n";
+
+                // Iterando através do array de mensalidades para montar a mensagem
+                mensalidades.forEach((mensalidade) => {
+                  mensagemMensalidades += `
+                    - Data vencimento: ${mensalidade.conta.data_vencimento}:
+                    - Valor: ${mensalidade.conta.valor}
+                    ------------------------------
+                  `;
+                });
+
+                // Enviando a mensagem formatada
+                const body = {
+                  text: formatBody(mensagemMensalidades, contact),
+                };
+                await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
+              }
 
             }).catch(async function (error) {
 
