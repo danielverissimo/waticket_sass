@@ -98,16 +98,17 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 				/>
 			</Menu>
 			<ConfirmationModal
-				title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")}${
-					ticket.id
-				} ${i18n.t("ticketOptionsMenu.confirmationModal.titleFrom")} ${
-					ticket.contact.name
-				}?`}
-				open={confirmationOpen}
-				onClose={setConfirmationOpen}
-				onConfirm={handleDeleteTicket}
+			title={`
+				${i18n.t("ticketOptionsMenu.confirmationModal.title")}
+				${ticket?.id ?? ''} 
+				${i18n.t("ticketOptionsMenu.confirmationModal.titleFrom")} 
+				${ticket?.contact?.name ?? ''}
+			?`}
+			open={confirmationOpen}
+			onClose={() => setConfirmationOpen(false)}
+			onConfirm={handleDeleteTicket}
 			>
-				{i18n.t("ticketOptionsMenu.confirmationModal.message")}
+			{i18n.t("ticketOptionsMenu.confirmationModal.message")}
 			</ConfirmationModal>
 			<TransferTicketModalCustom
 				modalOpen={transferTicketModalOpen}

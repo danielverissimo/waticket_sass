@@ -1558,7 +1558,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
 
     //VARS
     let url = `${erpCaioUrlValue}/api/`;
-    const key = erpCaioKey.value
+    const key = ''; //erpCaioKey.value
 
     const cnpj_cpf = getBodyMessage(msg);
     let numberCPFCNPJ = cpfcnpj;
