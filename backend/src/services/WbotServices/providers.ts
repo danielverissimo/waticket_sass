@@ -1527,7 +1527,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
     }
   }
 
-  if (filaescolhida === 'Consultar Mensalidades') {
+  if (filaescolhida.indexOf('Financeira') >= 0 && (ticket.lastMessage && ticket.lastMessage.trim().indexOf('consta(m) em aberto') >= 0)) {
 
     let cpfcnpj
     cpfcnpj = getBodyMessage(msg);
@@ -1557,7 +1557,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
     }
 
     //VARS
-    let url = `${erpCaioUrlValue}/api/`;
+    let url = `${erpCaioUrlValue}/`;
     const key = ''; //erpCaioKey.value
 
     const cnpj_cpf = getBodyMessage(msg);
@@ -1589,7 +1589,6 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
             };
 
             axios.request(options as any).then(async function (response) {
-              console.log('response.data >>>>', response.data);
               // Filtrando as mensalidades
               let mensalidades = response.data.filter(mensalidade => {
                 if (mensalidade.conta && mensalidade.conta.data_vencimento) {
@@ -1597,7 +1596,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   let dataVencimento = new Date(partes[2], partes[1] - 1, partes[0]);
                   let dataAtual = new Date();
                   dataAtual.setHours(0, 0, 0, 0);
-                  return dataVencimento < dataAtual;
+                  return dataVencimento < dataAtual && !mensalidade.conta.data_pagamento;
                 }
                 return false;
               });
