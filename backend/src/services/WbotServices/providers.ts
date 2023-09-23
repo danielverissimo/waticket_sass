@@ -1527,7 +1527,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
     }
   }
 
-  if (filaescolhida.indexOf('Financeira') >= 0 && (ticket.lastMessage && ticket.lastMessage.trim().indexOf('consta(m) em aberto') >= 0)) {
+  if (filaescolhida.indexOf('Financeira') >= 0 && (ticket.lastMessage && ticket.lastMessage.trim().indexOf('CPF do Responsável') >= 0)) {
 
     let cpfcnpj
     cpfcnpj = getBodyMessage(msg);
