@@ -1527,7 +1527,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
     }
   }
 
-  if (filaescolhida.indexOf('Financeira') >= 0) {
+  if (filaescolhida === 'Dir. Financeira 💰') {
 
     let cpfcnpj
     cpfcnpj = getBodyMessage(msg);
@@ -1589,6 +1589,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
             };
 
             axios.request(options as any).then(async function (response) {
+              console.log('response.data >>>>', response.data);
               // Filtrando as mensalidades
               let mensalidades = response.data.filter(mensalidade => {
                 if (mensalidade.conta && mensalidade.conta.data_vencimento) {
