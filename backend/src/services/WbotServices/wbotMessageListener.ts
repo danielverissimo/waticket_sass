@@ -51,6 +51,8 @@ import { cacheLayer } from "../../libs/cache";
 import { provider } from "./providers";
 import { debounce } from "../../helpers/Debounce";
 
+import axios from 'axios';
+
 const fs = require('fs')
 
 type Session = WASocket & {
@@ -315,7 +317,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
     const types = {
       conversation: msg?.message?.conversation,
       imageMessage: msg.message?.imageMessage?.caption,
-      videoMessage: msg.message.videoMessage?.caption,
+      videoMessage: msg.message && msg.message?.videoMessage ? msg.message?.videoMessage?.caption : null,
       extendedTextMessage: msg.message.extendedTextMessage?.text,
       buttonsResponseMessage: msg.message.buttonsResponseMessage?.selectedButtonId,
       templateButtonReplyMessage: msg.message?.templateButtonReplyMessage?.selectedId,
@@ -334,7 +336,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       liveLocationMessage: `Latitude: ${msg.message.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
       audioMessage: "Áudio",
-      listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
+      listMessage: getBodyButton(msg) || msg.message.listMessage?.description,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       reactionMessage: msg.message.reactionMessage?.text || "reaction",
     };
@@ -530,7 +532,7 @@ const verifyContact = async (
 const verifyQuotedMessage = async (
   msg: proto.IWebMessageInfo
 ): Promise<Message | null> => {
-  if (!msg) return null;
+  if (!msg || !msg?.message ) return null;
   const quoted = getQuotedMessageId(msg);
 
   if (!quoted) return null;
@@ -1099,33 +1101,86 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
 
       queueOptions.forEach((option, i) => {
         sectionsRows.push({
+          id: `${option.option}`,
           title: option.title,
-          rowId: `${option.option}`
+          description: "" // Coloque uma descrição aqui, se quiser
         });
       });
-      sectionsRows.push({
-        title: "Voltar Menu Inicial",
-        rowId: `#`
-      });
-      const sections = [
-        {
-          rows: sectionsRows
-        }
-      ];
 
-      const listMessage = {
-        text: formatBody(`\u200e${queue.greetingMessage}`, ticket.contact),
-        buttonText: "Escolha uma opção",
-        sections
+      const interactiveObject = {
+        type: "list",
+        header: {
+          type: "text",
+          text: "Select the food item you would like.",
+        },
+        body: {
+          text: "You will be presented with a list of options to choose from",
+        },
+        footer: {
+          text: "All of them are freshly packed",
+        },
+        action: {
+          button: "Order",
+          sections: [
+            {
+              title: "Section 1 - Fruit",
+              rows: [
+                {
+                  id: "1",
+                  title: "Apple",
+                  description: "Dozen",
+                },
+                {
+                  id: "2",
+                  title: "Orange",
+                  description: "Dozen",
+                },
+              ],
+            },
+            {
+              title: "Section 2 - Vegetables",
+              rows: [
+                {
+                  id: "3",
+                  title: "Spinach",
+                  description: "1kg ",
+                },
+                {
+                  id: "2",
+                  title: "Broccoli",
+                  description: "1kg",
+                },
+              ],
+            },
+          ],
+        },
       };
 
-      const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        listMessage
-      );
+      const payload = {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: ticket.contact.number,
+        type: "interactive",
+        interactive: interactiveObject
+      };
 
-      await verifyMessage(sendMsg, ticket, ticket.contact);
-    }
+      const ACCESS_TOKEN = 'EAAEry4rzM5sBO9w6ywLppmr0IuHfjewgZBA4zf0TxMfeuxF6bLdBdcRA2UyoWKxeQjkUu4rP0aXzUzJjrmDehDFqZAhK8AIrnK8lLGlKf3ddYovVZBauXg8V2hTQNHbc6TxXMipYknZCT4k8t1SoAegJqtGRqOCr18wBkd0DFYI0LStriumfauDvKafO0nEzD3sxoQucTib49ZCMrdnel7Xodz7IITGbOL04ZD';
+
+      // Aqui, você faz a requisição HTTP POST para o endpoint do Facebook
+      await axios.post('https://graph.facebook.com/v17.0/126337297232499/messages', payload, {
+        headers: {
+          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      }).then(async function(response) {
+        // await verifyMessage(response.data, ticket, ticket.contact);
+        console.log(response);
+      }).catch(async function(error) {
+        console.log(error);
+      });
+
+    };
+
 
     const botButton = async () => {
       const buttons = [];
